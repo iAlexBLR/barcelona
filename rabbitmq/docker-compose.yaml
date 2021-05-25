@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+
+  rabbitmq_master:
+    image: "${RABBITMQ_IMAGE}"
+    hostname: rabbitmq_master
+    environment:
+      - RABBITMQ_ERLANG_COOKIE
+      - RABBITMQ_DEFAULT_USER
+      - RABBITMQ_DEFAULT_PASS
+    networks:
+      - rabbitmq
+
+  rabbitmq_replica:
+    scale: 2
+    image: "${RABBITMQ_IMAGE}"
+    environment:
+      - RABBITMQ_MASTER=rabbitmq_master
+      - RABBITMQ_ERLANG_COOKIE
+    volumes:
+      - ./entrypoint.sh:/usr/local/bin/cluster-entrypoint.sh:ro
+    entrypoint: /usr/local/bin/cluster-entrypoint.sh
+    networks:
+      - rabbitmq
+    depends_on:
+      - rabbitmq_master
+
+  haproxy:
+    image: "${RABBITMQ_HAPROXY_IMAGE}"
+    ports:
+      - "${RABBITMQ_NODE_PORT}:${RABBITMQ_NODE_PORT}"
+      - "${RABBITMQ_MANAGEMENT_PORT}:${RABBITMQ_MANAGEMENT_PORT}"
+      - "${RABBITMQ_STATS_PORT}:${RABBITMQ_STATS_PORT}"
+    environment:
+      - RABBITMQ_NODE_PORT
+      - RABBITMQ_MANAGEMENT_PORT
+      - RABBITMQ_STATS_PORT
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    networks:
+      - rabbitmq
+    depends_on:
+      - rabbitmq_master
+      - rabbitmq_replica
+
+networks:
+  rabbitmq:
+    name: rabbitmq_network

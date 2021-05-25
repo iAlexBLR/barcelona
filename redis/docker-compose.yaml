@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+
+  redis_master:
+    image: "${REDIS_IMAGE}"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+      - ALLOW_EMPTY_PASSWORD=yes
+    expose:
+      - "${REDIS_PORT}"
+    volumes:
+      - ./data:/bitnami
+    networks:
+      - redis
+
+  redis_replica:
+    scale: 2
+    image: "${REDIS_IMAGE}"
+    environment:
+      - REDIS_REPLICATION_MODE=slave
+      - REDIS_MASTER_HOST=redis_master
+      - REDIS_MASTER_PORT_NUMBER=${REDIS_PORT}
+      - ALLOW_EMPTY_PASSWORD=yes
+    expose:
+      - "${REDIS_PORT}"
+    volumes:
+      - ./data:/bitnami
+    networks:
+      - redis
+    depends_on:
+      - redis_master
+
+  redis_sentinel:
+    scale: 3
+    image: "${REDIS_SENTINEL_IMAGE}"
+    environment:
+      - REDIS_MASTER_HOST=redis_master
+      - REDIS_MASTER_PORT_NUMBER=${REDIS_PORT}
+      - REDIS_SENTINEL_PORT_NUMBER=${REDIS_SENTINEL_PORT}
+      - REDIS_SENTINEL_QUORUM=2
+      - REDIS_SENTINEL_RESOLVE_HOSTNAMES=yes
+    expose:
+      - "${REDIS_SENTINEL_PORT}"
+    networks:
+      - redis
+    depends_on:
+      - redis_replica
+
+  haproxy:
+    image: "${REDIS_HAPROXY_IMAGE}"
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+      - "${REDIS_STATS_PORT}:${REDIS_STATS_PORT}"
+    environment:
+      - REDIS_PORT
+      - REDIS_STATS_PORT
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    networks:
+      - redis
+    depends_on:
+      - redis_master
+      - redis_replica
+
+networks:
+  redis:
+    name: redis_network
