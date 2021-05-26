@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+
+  management:
+    image: "${MYSQL_IMAGE}"
+    hostname: management
+    command: ["ndb_mgmd"]
+    environment:
+      - MYSQL_TCP_PORT
+    volumes:
+      - type: bind
+        source: ./mysql-cluster.cnf
+        target: /etc/mysql-cluster.cnf
+    networks:
+      mysql:
+        ipv4_address: 192.168.0.2
+
+  ndb1: &node
+    image: "${MYSQL_IMAGE}"
+    hostname: ndb1
+    command: ["ndbd"]
+    environment:
+      - MYSQL_TCP_PORT
+    networks:
+      mysql:
+        ipv4_address: 192.168.0.3
+    depends_on:
+      - management
+
+  ndb2:
+    << : *node
+    hostname: ndb2
+    networks:
+      mysql:
+        ipv4_address: 192.168.0.4
+
+  server:
+    image: "${MYSQL_IMAGE}"
+    hostname: mysql
+    command: ["mysqld"]
+    environment:
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - MYSQL_TCP_PORT
+    networks:
+      mysql:
+        ipv4_address: 192.168.0.10
+    depends_on:
+      - ndb1
+      - ndb2
+
+networks:
+  mysql:
+    name: mysql_network
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/16
