@@ -1,51 +1,58 @@
 version: '3.8'
 
 services:
-
-  redis_master:
+  master:
+    hostname: redis_1
     image: "${REDIS_IMAGE}"
     environment:
       - REDIS_REPLICATION_MODE=master
-      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_PASSWORD
     expose:
       - "${REDIS_PORT}"
-    volumes:
-      - ./data:/bitnami
-    networks:
+    volumes: &redis_data
+      - type: bind
+        source: ./data
+        target: /bitnami
+    networks: &network
       - redis
 
-  redis_replica:
-    scale: 2
+  replica_1: &replica
+    hostname: redis_2
     image: "${REDIS_IMAGE}"
     environment:
       - REDIS_REPLICATION_MODE=slave
-      - REDIS_MASTER_HOST=redis_master
+      - REDIS_MASTER_HOST=master
       - REDIS_MASTER_PORT_NUMBER=${REDIS_PORT}
-      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_MASTER_PASSWORD="${REDIS_PASSWORD}"
+      - REDIS_PASSWORD
     expose:
       - "${REDIS_PORT}"
-    volumes:
-      - ./data:/bitnami
-    networks:
-      - redis
+    volumes: *redis_data
+    networks: *network
     depends_on:
-      - redis_master
+      - master
 
-  redis_sentinel:
+  replica_2:
+    << : *replica
+    hostname: redis_3
+
+  sentinel:
     scale: 3
     image: "${REDIS_SENTINEL_IMAGE}"
     environment:
-      - REDIS_MASTER_HOST=redis_master
+      - REDIS_MASTER_HOST=master
       - REDIS_MASTER_PORT_NUMBER=${REDIS_PORT}
+      - REDIS_MASTER_PASSWORD="${REDIS_PASSWORD}"
       - REDIS_SENTINEL_PORT_NUMBER=${REDIS_SENTINEL_PORT}
       - REDIS_SENTINEL_QUORUM=2
       - REDIS_SENTINEL_RESOLVE_HOSTNAMES=yes
     expose:
       - "${REDIS_SENTINEL_PORT}"
-    networks:
-      - redis
+    networks: *network
     depends_on:
-      - redis_replica
+      - master
+      - replica_1
+      - replica_2
 
   haproxy:
     image: "${REDIS_HAPROXY_IMAGE}"
@@ -55,13 +62,17 @@ services:
     environment:
       - REDIS_PORT
       - REDIS_STATS_PORT
+      - REDIS_PASSWORD
     volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-    networks:
-      - redis
+      - type: bind
+        source: ./haproxy.cfg
+        target: /usr/local/etc/haproxy/haproxy.cfg
+        read_only: true
+    networks: *network
     depends_on:
-      - redis_master
-      - redis_replica
+      - master
+      - replica_1
+      - replica_2
 
 networks:
   redis:
