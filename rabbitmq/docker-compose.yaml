@@ -1,30 +1,40 @@
 version: '3.8'
 
 services:
-
-  rabbitmq_master:
+  node_1:
+    hostname: node_1
     image: "${RABBITMQ_IMAGE}"
-    hostname: rabbitmq_master
     environment:
-      - RABBITMQ_ERLANG_COOKIE
       - RABBITMQ_DEFAULT_USER
       - RABBITMQ_DEFAULT_PASS
-    networks:
+      - RABBITMQ_ERLANG_COOKIE
+    volumes: &rabbitmq_data
+      - type: bind
+        source: ./data
+        target: /var/lib/rabbitmq/mnesia
+    networks: &network
       - rabbitmq
 
-  rabbitmq_replica:
-    scale: 2
+  node_2: &node
+    hostname: node_2
     image: "${RABBITMQ_IMAGE}"
     environment:
-      - RABBITMQ_MASTER=rabbitmq_master
+      - RABBITMQ_DEFAULT_NODE=node_1
       - RABBITMQ_ERLANG_COOKIE
     volumes:
-      - ./entrypoint.sh:/usr/local/bin/cluster-entrypoint.sh:ro
-    entrypoint: /usr/local/bin/cluster-entrypoint.sh
-    networks:
-      - rabbitmq
+      - << : *rabbitmq_data
+      - type: bind
+        source: ./entrypoint.sh
+        target: &entrypoint /usr/local/bin/cluster-entrypoint.sh
+        read_only: true
+    entrypoint: *entrypoint
+    networks: *network
     depends_on:
-      - rabbitmq_master
+      - node_1
+
+  node_3:
+    << : *node
+    hostname: node_3
 
   haproxy:
     image: "${RABBITMQ_HAPROXY_IMAGE}"
@@ -37,12 +47,13 @@ services:
       - RABBITMQ_MANAGEMENT_PORT
       - RABBITMQ_STATS_PORT
     volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-    networks:
-      - rabbitmq
+      - type: bind
+        source: ./haproxy.cfg
+        target: /usr/local/etc/haproxy/haproxy.cfg
+        read_only: true
+    networks: *network
     depends_on:
-      - rabbitmq_master
-      - rabbitmq_replica
+      - node_1
 
 networks:
   rabbitmq:

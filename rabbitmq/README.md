@@ -1,5 +1,5 @@
-make entrypoint.sh executable
-
-RABBITMQ_ERLANG_COOKIE env variable support is deprecated and will be REMOVED in a future version. Use the $HOME/.erlang.cookie file or the --erlang-cookie switch instead.
-
-      - ./rabbitmq/data:/var/lib/rabbitmq/mnesia/rabbit@my-rabbit
+chmox +x entrypoint.sh
+mkdir -p data && sudo chown 1001 data
+ERLANG cookie warning cannot be disabled
+For RabbitMQ I'm using separate blocks for each of replicas due to problems with data persistency.
+Also, data folder will contain pidfiles
