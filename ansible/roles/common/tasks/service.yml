@@ -1,0 +1,12 @@
+---
+# tasks file for Docker-Compose services
+
+- name: Configure service for docker-compose projects
+  ansible.builtin.template:
+    src: "service.tpl"
+    dest: "/etc/systemd/system/{{ global.service_prefix }}@.service"
+  notify:
+    - "Reload systemd"
+    - "Reload MySQL project"
+    - "Reload RabbitMQ project"
+    - "Reload Redis project"

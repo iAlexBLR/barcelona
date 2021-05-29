@@ -1,0 +1,26 @@
+---
+# tasks file for configuring project's Docker folder
+
+- name: Creating data folder for persistent storage
+  become: yes
+  ansible.builtin.file:
+    path: "{{ global.home }}/{{ role_name }}/{{ redis.data_folder }}"
+    state: directory
+    mode: '0777'
+
+- name: Configure templates for docker-compose
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ global.home }}/{{ role_name }}/{{ item | replace('.tpl','') }}"
+  with_items:
+    - docker-compose.yml.tpl
+    - .env.tpl
+    - haproxy.cfg.tpl
+  notify: "Reload Redis project"
+
+- name: Enable Redis service
+  become: yes
+  ansible.builtin.service:
+    name: "{{ global.service_prefix }}@{{ role_name }}"
+    enabled: yes
+    state: started

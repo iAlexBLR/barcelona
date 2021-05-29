@@ -1,0 +1,17 @@
+---
+# defaults file for Rabbitmq
+rabbitmq:
+  data_folder: "data"
+  server:
+    replicas: 2
+    image: "rabbitmq:3.8.16-management-alpine"
+    port: 5672
+    port_management: 15672
+    user: rabbitmq
+    password: rabbitmq
+    erlang_cookie: rabbitmq
+  haproxy:
+    image: "haproxy:2.4-alpine"
+    port: 5672
+    port_management: 15672
+    port_stats: 56720

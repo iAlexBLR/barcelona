@@ -1,0 +1,33 @@
+---
+# tasks file for configuring project's Docker folder
+
+- name: Creating data folder for persistent storage
+  become: yes
+  ansible.builtin.file:
+    path: "{{ global.home }}/{{ role_name }}/{{ rabbitmq.data_folder }}"
+    state: directory
+    mode: '0777'
+
+- name: Configure templates for docker-compose
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ global.home }}/{{ role_name }}/{{ item | replace('.tpl','') }}"
+  with_items:
+    - docker-compose.yml.tpl
+    - .env.tpl
+    - haproxy.cfg.tpl
+  notify: "Reload RabbitMQ project"
+
+- name: Copy entrypoint script
+  ansible.builtin.copy:
+    src: entrypoint.sh
+    dest: "{{ global.home }}/{{ role_name }}/entrypoint.sh"
+    mode: '0755'
+  notify: "Reload RabbitMQ project"
+
+- name: Enable Rabbitmq service
+  become: yes
+  ansible.builtin.service:
+    name: "{{ global.service_prefix }}@{{ role_name }}"
+    enabled: yes
+    state: started

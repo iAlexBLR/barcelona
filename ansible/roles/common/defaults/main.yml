@@ -1,0 +1,8 @@
+---
+# defaults file for common
+common:
+  locale: "en_US.UTF-8"
+  timezone: "US/Eastern"
+  docker_compose:
+    version: "1.29.2"
+    location: "/usr/bin/docker-compose"

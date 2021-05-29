@@ -1,0 +1,20 @@
+---
+# defaults file for mysql
+mysql:
+  data_folder: "data"
+  server:
+    replicas: 2
+    image: "mysql/mysql-cluster:8.0"
+    port: 3306
+    user: "user"
+    password: "password"
+    password_root: "password_root"
+  node:
+    replicas: 2
+  mgm:
+    replicas: 2
+  haproxy:
+    image: "haproxy:2.4-alpine"
+    port: 3306
+    port_stats: 33060
+    user: haproxy

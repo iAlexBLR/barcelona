@@ -1,0 +1,44 @@
+---
+# tasks file for configuring project's Docker folder
+
+- name: Creating data folder for persistent storage
+  become: yes
+  ansible.builtin.file:
+    path: "{{ global.home }}/{{ role_name }}/{{ mysql.data_folder }}"
+    state: directory
+    mode: '0777'
+
+- name: Creating database node data folders for ndb persistent storage
+  become: yes
+  ansible.builtin.file:
+    path: "{{ global.home }}/{{ role_name }}/{{ mysql.data_folder }}/ndb_{{ item }}"
+    state: directory
+    mode: '0777'
+  with_sequence: count={{ mysql.node.replicas }}
+
+- name: Creating database node data folders for mgm persistent storage
+  become: yes
+  ansible.builtin.file:
+    path: "{{ global.home }}/{{ role_name }}/{{ mysql.data_folder }}/ndb_mgm_{{ item }}"
+    state: directory
+    mode: '0777'
+  with_sequence: count={{ mysql.mgm.replicas }}
+
+- name: Configure templates for docker-compose
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ global.home }}/{{ role_name }}/{{ item | replace('.tpl','') }}"
+  with_items:
+    - docker-compose.yml.tpl
+    - .env.tpl
+    - mysql-cluster.cnf.tpl
+    - my.cnf.tpl
+    - haproxy.cfg.tpl
+  notify: "Reload MySQL project"
+
+- name: Enable MySQL service
+  become: yes
+  ansible.builtin.service:
+    name: "{{ global.service_prefix }}@{{ role_name }}"
+    enabled: yes
+    state: started

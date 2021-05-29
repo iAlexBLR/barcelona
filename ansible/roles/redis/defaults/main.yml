@@ -1,0 +1,18 @@
+---
+# defaults file for redis
+redis:
+  data_folder: "data"
+  server:
+    replicas: 2
+    image: "bitnami/redis:6.0"
+    port: 6379
+    password: "password"
+  sentinel:
+    replicas: 3
+    image: "bitnami/redis-sentinel:6.0"
+    port: 26379
+    quorum: 2
+  haproxy:
+    image: "haproxy:2.4-alpine"
+    port: 6379
+    port_stats: 63790

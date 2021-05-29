@@ -1,0 +1,25 @@
+---
+# tasks file for common
+
+- name: Set up locale
+  community.general.locale_gen:
+    name: "{{ common.locale }}"
+    state: present
+
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ common.timezone }}"
+
+- name: Install Docker
+  import_tasks: docker.yml
+
+- name: Set up servicies for Docker-Compose projects
+  import_tasks: service.yml
+
+- name: Set up global project folder
+  become: yes
+  ansible.builtin.file:
+    state: directory
+    path: "{{ global.home }}"
+    owner: "{{ ansible_user_id | string }}"
+    group: "{{ ansible_user_gid | string }}"

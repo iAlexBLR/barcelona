@@ -1,0 +1,5 @@
+# The global variable file
+
+global:
+  home: "/etc/project"
+  service_prefix: "project"
