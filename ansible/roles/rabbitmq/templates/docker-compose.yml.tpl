@@ -12,8 +12,6 @@ services:
       - type: bind
         source: "./${RABBITMQ_DATA_FOLDER}"
         target: "/var/lib/rabbitmq/mnesia"
-    networks: &network
-      - rabbitmq
 
 {% set index_offset = 2 %}
 {% for index in (range(index_offset, redis.server.replicas + index_offset) | list) %}
@@ -31,7 +29,6 @@ services:
         target: &entrypoint /usr/local/bin/cluster-entrypoint.sh
         read_only: true
     entrypoint: *entrypoint
-    networks: *network
     depends_on:
       - rabbitmq_1
 
@@ -57,10 +54,9 @@ services:
         source: ./haproxy.cfg
         target: /usr/local/etc/haproxy/haproxy.cfg
         read_only: true
-    networks: *network
     depends_on:
       - rabbitmq_1
 
 networks:
-  rabbitmq:
+  default:
     name: rabbitmq_network

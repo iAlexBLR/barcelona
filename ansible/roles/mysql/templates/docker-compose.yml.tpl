@@ -23,8 +23,6 @@ services:
       - type: bind
         source: "./${MYSQL_SERVER_DATA_FOLDER}/ndb_mgm_{{ index }}"
         target: /var/lib/mysql
-    networks: &network
-      - mysql
 
 {% else %}
   ndb_mgm_{{ index }}:
@@ -55,7 +53,6 @@ services:
       - type: bind
         source: "./${MYSQL_SERVER_DATA_FOLDER}/ndb_{{ index }}"
         target: /var/lib/mysql
-    networks: *network
 
 {% else %}
 
@@ -87,7 +84,9 @@ services:
     volumes:
       - << : *cluster_cnf
       - << : *my_cnf
-    networks: *network
+      - type: bind
+        source: ./create_user.sql
+        target: /docker-entrypoint-initdb.d/create_user.sql
 
 {% else %}
 
@@ -110,8 +109,7 @@ services:
         source: ./haproxy.cfg
         target: /usr/local/etc/haproxy/haproxy.cfg
         read_only: true
-    networks: *network
 
 networks:
-  mysql:
+  default:
     name: mysql_network

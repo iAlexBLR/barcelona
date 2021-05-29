@@ -28,5 +28,5 @@ backend mysql
 
 {% set index_offset = 1 %}
 {% for index in (range(index_offset, mysql.server.replicas + index_offset) | list) %}
-  server server_{{ index }} "server_{{ index }}:${MYSQL_SERVER_PORT}"
+  server server_{{ index }} "server_{{ index }}:${MYSQL_SERVER_PORT}" check inter 10s
 {% endfor %}

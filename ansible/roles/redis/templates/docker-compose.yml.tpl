@@ -31,7 +31,6 @@ services:
     expose:
       - ${REDIS_SERVER_PORT}
     volumes: *redis_data
-    networks: *network
     depends_on:
       - master
 
@@ -54,7 +53,6 @@ services:
       - REDIS_SENTINEL_RESOLVE_HOSTNAMES=yes
     expose:
       - "${REDIS_SENTINEL_PORT}"
-    networks: *network
     depends_on:
       - master
 
@@ -72,10 +70,9 @@ services:
         source: "./haproxy.cfg"
         target: "/usr/local/etc/haproxy/haproxy.cfg"
         read_only: true
-    networks: *network
     depends_on:
       - master
 
 networks:
-  redis:
+  default:
     name: redis_network

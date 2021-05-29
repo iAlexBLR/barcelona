@@ -33,6 +33,7 @@
     - .env.tpl
     - mysql-cluster.cnf.tpl
     - my.cnf.tpl
+    - create_user.sql.tpl
     - haproxy.cfg.tpl
   notify: "Reload MySQL project"
 
