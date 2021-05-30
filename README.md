@@ -26,7 +26,7 @@ After the installation, make sure that the following commands were run in the ro
 pre-commit install
 ```
 
-`ansible-lint` and `terraform_docs` will run during the pre-commit run.
+`ansible-lint` will run during the pre-commit run.
 
 ## Vagrant
 
