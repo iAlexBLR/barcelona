@@ -12,7 +12,7 @@ mysql:
   node:
     replicas: 2
   mgm:
-    replicas: 2
+    replicas: 1
   haproxy:
     image: "haproxy:2.4-alpine"
     port: 3306

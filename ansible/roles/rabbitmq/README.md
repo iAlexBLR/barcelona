@@ -1,38 +1,41 @@
-Role Name
+RabbitMQ
 =========
 
-A brief description of the role goes here.
+This role creates a RabbitMQ cluster in Docker and a Linux service that manages the cluster behavior.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+This module haas no requirements.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Default variables have the following structure:
+```
+rabbitmq:
+  data_folder: folder for storing application data on the system.
+  server:
+    replicas: rabbitmq replicas count.
+    image: rabbitmq docker image.
+    port: rabbitmq port.
+    port_management: rabbitmq management port.
+    user: rabbitmq username.
+    password: rabbitmq password.
+    erlang_cookie: rabbitmq erlang cookie for attaching into cluster.
+  haproxy:
+    image: haproxy docker image.
+    port: haproxy rabbitmq port.
+    port_management: haproxy rabbitmq management port.
+    port_stats: haproxy rabbitmq port for statistics.
+```
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+This module has dependency on [common](../common/) module.
 
-Example Playbook
-----------------
+Additional tips
+---------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
-
-License
--------
-
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Since I did not find a nice solution to successfully join all containers to the cluster, I decided to change the entrypoint so that on startup the replicas would join the cluster themselves. The details can be found [here](./files/entrypoint.sh).

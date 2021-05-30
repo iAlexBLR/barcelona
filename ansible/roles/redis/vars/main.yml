@@ -1,8 +1,0 @@
----
-# vars file for redis
-redis:
-  server:
-    replicas: 2
-    password: "password"
-  sentinel:
-    replicas: 3

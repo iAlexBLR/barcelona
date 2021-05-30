@@ -1,38 +1,33 @@
-Role Name
+Common
 =========
 
-A brief description of the role goes here.
+This module installs the necessary dependencies for future clusters and prepares the folder for the project.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+This module haas no requirements.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Default variables have the following structure:
+```
+common:
+  locale: default locale for the VM.
+  timezone: default timezone for the VM.
+  docker_compose:
+    version: docker-compose version to install.
+    location: docker-compose binary location.
+```
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+This module has no dependencies.
 
-Example Playbook
-----------------
+Additional tips
+---------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
-
-License
--------
-
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Since all clusters are created in the same scenario, namely using docker-compose, it was decided to create a basic structure of the service file and connect it depending on the cluster required.
+Therefore, in the service [template](./templates/service.tpl) there is a variable `%i`, which is responsible for the cluster name. Depending on this variable, the service goes into the desired folder and starts the desired project.
