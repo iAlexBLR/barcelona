@@ -13,8 +13,6 @@ services:
       - type: bind
         source: "./${REDIS_SERVER_DATA_FOLDER}"
         target: "/bitnami"
-    networks: &network
-      - redis
 
 {% set index_offset = 1 %}
 {% for index in (range(index_offset, redis.server.replicas + index_offset) | list) %}

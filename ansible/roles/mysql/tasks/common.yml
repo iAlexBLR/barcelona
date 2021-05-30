@@ -5,3 +5,4 @@
   ansible.builtin.file:
     path: "{{ global.home }}/{{ role_name }}"
     state: directory
+    mode: '0755'

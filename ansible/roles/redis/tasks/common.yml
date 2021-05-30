@@ -2,12 +2,12 @@
 # tasks file for project's preparations
 
 - name: Setting sysctl options
-  become: yes
+  become: true
   ansible.posix.sysctl:
     name: "{{ item.key }}"
     value: "{{ item.value }}"
-    sysctl_set: yes
-    reload: yes
+    sysctl_set: true
+    reload: true
     state: present
   with_dict:
     vm.overcommit_memory: 1
@@ -18,3 +18,4 @@
   ansible.builtin.file:
     path: "{{ global.home }}/{{ role_name }}"
     state: directory
+    mode: '0755'

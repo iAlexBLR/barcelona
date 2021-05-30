@@ -5,6 +5,7 @@
   ansible.builtin.template:
     src: "service.tpl"
     dest: "/etc/systemd/system/{{ global.service_prefix }}@.service"
+    mode: '0644'
   notify:
     - "Reload systemd"
     - "Reload MySQL project"

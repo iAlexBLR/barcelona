@@ -2,7 +2,7 @@
 # tasks file for configuring project's Docker folder
 
 - name: Creating data folder for persistent storage
-  become: yes
+  become: true
   ansible.builtin.file:
     path: "{{ global.home }}/{{ role_name }}/{{ rabbitmq.data_folder }}"
     state: directory
@@ -12,6 +12,7 @@
   ansible.builtin.template:
     src: "{{ item }}"
     dest: "{{ global.home }}/{{ role_name }}/{{ item | replace('.tpl','') }}"
+    mode: '0644'
   with_items:
     - docker-compose.yml.tpl
     - .env.tpl
@@ -26,8 +27,7 @@
   notify: "Reload RabbitMQ project"
 
 - name: Enable Rabbitmq service
-  become: yes
+  become: true
   ansible.builtin.service:
     name: "{{ global.service_prefix }}@{{ role_name }}"
-    enabled: yes
-    state: started
+    enabled: true

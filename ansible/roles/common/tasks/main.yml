@@ -17,9 +17,10 @@
   import_tasks: service.yml
 
 - name: Set up global project folder
-  become: yes
+  become: true
   ansible.builtin.file:
     state: directory
     path: "{{ global.home }}"
     owner: "{{ ansible_user_id | string }}"
     group: "{{ ansible_user_gid | string }}"
+    mode: '0755'

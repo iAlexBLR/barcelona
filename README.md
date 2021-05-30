@@ -1,0 +1,4 @@
+- python3
+- pip3
+- pip3 install ansible
+- pip3 install "ansible-lint"

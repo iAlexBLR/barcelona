@@ -1,5 +1,9 @@
 galaxy_info:
   author: Alex Brazovsky
   description: This role creates and configures common resources for the projects
-  license: license (GPL-2.0-or-later, MIT, etc)
+  license: Apache
   min_ansible_version: 2.1
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
